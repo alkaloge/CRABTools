@@ -23,7 +23,7 @@ def getFileName(line) :
 
 
 scriptName = "out.py"
-f = open("../../crab_template.py", "r")
+f = open("../../Files/crab_template.py", "r")
 text = f.read()
 #print text
 
@@ -70,7 +70,7 @@ events=1000
 mjobs = 5
 
 
-ff = open("../../runjme.sh", "r")
+ff = open("../../Files/runjme.sh", "r")
 textf = ff.read()
 
 
