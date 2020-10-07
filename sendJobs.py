@@ -95,7 +95,10 @@ nevents=sum(Nevents)
 print nevents
 mjobs = 5
 #this will set each job to about 50k on average
+average = int(len(Nevents))
 mjobs=int(nevents/50000)
+if mjobs > 5 : mjobs = 5
+print 'how many files', average, mjobs
 
 ff = open("../../Files/runjme.sh", "r")
 textf = ff.read()
@@ -115,10 +118,15 @@ for i in range(1, mjobs) :
     outLines.append("    config.JobType.outputFiles = ['{0:s}'] \n".format(outFile))
     outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/newCrab/{0:s}/{1:s}_{2:s}/part_{3:s}.sh' \n".format(args.selection, args.nickName, era, str(i)))
     #outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/test/test/{1:s}_{2:s}/part_{3:s}.sh' \n".format(args.selection, args.nickName, era, str(i)))
+    
     outLines.append("    config.JobType.maxJobRuntimeMin = 3000 \n") 
     outLines.append("    config.Data.splitting= 'FileBased' \n") 
     outLines.append("    config.Data.unitsPerJob= 1 \n") 
     outLines.append("    config.Data.totalUnits= {0:s} \n".format(str(nevents)))
+
+    if 'Run2016' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt'")
+    if 'Run2017' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'")
+    if 'Run2018' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt")
     outLines.append("    submit(config) \n")
 
     runName = "part_{0:s}.sh".format(str(i))
@@ -131,7 +139,11 @@ for i in range(1, mjobs) :
 
     runLines.append("sed -i "'"s/STARTEVENT/{0:s}/g"'" make_jmev2.py \n" .format(str(start)) )
     runLines.append("sed -i "'"s/FINISHEVENT/{0:s}/g"'" make_jmev2.py \n" .format(str(finish)) )
-    runLines.append("python make_jmev2.py True 2016 B \n" .format(str(start)) )
+    if 'Run'  in str(args.nickName) : 
+        
+        runLines.append("python make_jmev2.py False {0:s} {1:s} \n" .format( era, period ))
+        
+    else  : runLines.append("python make_jmev2.py True {0:s} B \n" .format(era) )
     runLines.append("cp inFile_Skim.root ../../{0:s} \n".format(outFile))
     runLines.append("python -c \"import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))\" " )
     open(runName,'w').writelines(runLines)
