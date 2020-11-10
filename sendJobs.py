@@ -12,9 +12,9 @@ def getArgs() :
     parser.add_argument("--nickName",default='MCpileup',help="Data set nick name.") 
     parser.add_argument("-m","--mode",default='anaXRD',help="Mode (script to run).")
     parser.add_argument("-y","--year",default=2017,type=str,help="Data taking period, 2016, 2017 or 2018")
-    parser.add_argument("-c","--concatenate",default=1,type=int,help="On how many files to run on each job")
-    parser.add_argument("-s","--selection",default='ZH',type=str,help="select ZH or AZH")
-    parser.add_argument("-j","--doSystematics",default='yes',type=str,help="do JME systematics")
+    parser.add_argument("-c","--concatenate",default=5,type=int,help="How many files to run on each job")
+    parser.add_argument("-t","--tag",default='ZH',type=str,help="Select a tag for your jobs")
+    parser.add_argument("-s","--doSystematics",default='yes',type=str,help="do JME systematics")
     parser.add_argument("-l","--islocal",default='no',type=str,help="get list from /eos/ not DAS")
     return parser.parse_args()
 
@@ -66,7 +66,6 @@ dataset=[]
 era = str(args.year)
 mjobs=args.concatenate
 
-
 for nFiles, file in enumerate(files) :
      
     fileName=getFileName(file)
@@ -80,7 +79,6 @@ for nFiles, file in enumerate(files) :
     command = "dasgoclient --query={0:s}  > nevents.txt".format(query)
     #out = subprocess.check_output( os.system(command), shell=True)
     os.system(command)
-    
 
 Nevents=[]
 nev =open('nevents.txt','r').readlines()
@@ -89,15 +87,17 @@ for i, j in enumerate(nev) : Nevents.append(int(j))
     #print 'for ', args.dataSet, 'we have', output
 
 
-
 nevents=sum(Nevents)
+#nevents=10
 #print '-------------------', Nevents, dataset, nevents
 print nevents
-mjobs = 5
+#mjobs = 5
 #this will set each job to about 50k on average
+
 average = int(len(Nevents))
 mjobs=int(nevents/50000)
 if mjobs > 5 : mjobs = 5
+#mjobs=5
 print 'how many files', average, mjobs
 
 ff = open("../../Files/runjme.sh", "r")
@@ -106,7 +106,7 @@ textf = ff.read()
 
 outLines=['#!/usr/local/bin/python \n']
 outLines.append(text)
-for i in range(1, mjobs) :
+for i in range(0, mjobs) :
 
     outFile = '{0:s}_{1:s}_{2:s}of{3:s}.root'.format(str(args.nickName), era, str(i), str(mjobs-1) )
 
@@ -116,21 +116,22 @@ for i in range(1, mjobs) :
     outLines.append("    config.Data.inputDataset = '{0:s}' \n".format(str(args.dataSet)))
     outLines.append("    config.Data.outputDatasetTag = '{0:s}_{1:s}' \n".format(args.nickName, era))
     outLines.append("    config.JobType.outputFiles = ['{0:s}'] \n".format(outFile))
-    outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/newCrab/{0:s}/{1:s}_{2:s}/part_{3:s}.sh' \n".format(args.selection, args.nickName, era, str(i)))
-    #outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/test/test/{1:s}_{2:s}/part_{3:s}.sh' \n".format(args.selection, args.nickName, era, str(i)))
+    outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/newCrab/{0:s}/{1:s}_{2:s}/part_{3:s}of{4:s}.sh' \n".format(args.tag, args.nickName, era, str(i),str(mjobs)))
+    #outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/test/test/{1:s}_{2:s}/part_{3:s}.sh' \n".format(args.tag, args.nickName, era, str(i)))
     
     outLines.append("    config.JobType.maxJobRuntimeMin = 3000 \n") 
     outLines.append("    config.Data.splitting= 'FileBased' \n") 
     outLines.append("    config.Data.unitsPerJob= 1 \n") 
     outLines.append("    config.Data.totalUnits= {0:s} \n".format(str(nevents)))
 
-    if 'Run2016' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt'")
-    if 'Run2017' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'")
-    if 'Run2018' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt")
+    #if 'Run2016' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt'")
+    #if 'Run2017' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'")
+    #if 'Run2018' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt")
     outLines.append("    submit(config) \n")
 
-    runName = "part_{0:s}.sh".format(str(i))
-    runLines=['#!/usr/local/bin/python \n']
+    runName = "part_{0:s}of{2:s}.sh".format(str(i),str(mjobs))
+    #runLines=['#!/usr/local/bin/python \n']
+    runLines=[]
     runLines.append(textf)
     start= '%.2f' %(i/mjobs)
     finish = '%.2f' %((i+1)/mjobs)
@@ -139,7 +140,8 @@ for i in range(1, mjobs) :
 
     runLines.append("sed -i "'"s/STARTEVENT/{0:s}/g"'" make_jmev2.py \n" .format(str(start)) )
     runLines.append("sed -i "'"s/FINISHEVENT/{0:s}/g"'" make_jmev2.py \n" .format(str(finish)) )
-    if 'Run'  in str(args.nickName) : 
+    runLines.append("echo will skim between {0:s} and {1:s} \n".format(str(start), str(finish)))
+    if 'Run'  in str(args.nickName) or 'data' in str(args.nickName): 
         
         runLines.append("python make_jmev2.py False {0:s} {1:s} \n" .format( era, period ))
         
