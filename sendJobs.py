@@ -108,7 +108,7 @@ outLines=['#!/usr/local/bin/python \n']
 outLines.append(text)
 for i in range(0, mjobs) :
 
-    outFile = '{0:s}_{1:s}_{2:s}of{3:s}.root'.format(str(args.nickName), era, str(i), str(mjobs-1) )
+    outFile = '{0:s}_{1:s}_{2:s}of{3:s}.root'.format(str(args.nickName), era, str(i+1), str(mjobs) )
 
     outLines.append("    config.General.workArea = '../../Crab_projects_{0:s}_newJECs' \n".format(era) )
     outLines.append("    config.General.requestName = '{0:s}_{1:s}_part{2:s}' \n".format(args.nickName, era, str(i)))
@@ -116,7 +116,7 @@ for i in range(0, mjobs) :
     outLines.append("    config.Data.inputDataset = '{0:s}' \n".format(str(args.dataSet)))
     outLines.append("    config.Data.outputDatasetTag = '{0:s}_{1:s}' \n".format(args.nickName, era))
     outLines.append("    config.JobType.outputFiles = ['{0:s}'] \n".format(outFile))
-    outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/newCrab/{0:s}/{1:s}_{2:s}/part_{3:s}of{4:s}.sh' \n".format(args.tag, args.nickName, era, str(i),str(mjobs)))
+    outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/newCrab/{0:s}/{1:s}_{2:s}/part_{3:s}of{4:s}.sh' \n".format(args.tag, args.nickName, era, str(i+1),str(mjobs)))
     #outLines.append("    config.JobType.scriptExe = '/uscms_data/d3/alkaloge/ntuples/CMSSW_10_6_4/src/test/test/{1:s}_{2:s}/part_{3:s}.sh' \n".format(args.tag, args.nickName, era, str(i)))
     
     outLines.append("    config.JobType.maxJobRuntimeMin = 3000 \n") 
@@ -129,7 +129,7 @@ for i in range(0, mjobs) :
     #if 'Run2018' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt")
     outLines.append("    submit(config) \n")
 
-    runName = "part_{0:s}of{1:s}.sh".format(str(i),str(mjobs))
+    runName = "part_{0:s}of{1:s}.sh".format(str(i+1),str(mjobs))
     #runLines=['#!/usr/local/bin/python \n']
     runLines=[]
     runLines.append(textf)
