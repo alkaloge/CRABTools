@@ -129,7 +129,7 @@ for i in range(0, mjobs) :
     #if 'Run2018' in str(args.dataSet) : outLines.append("    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt")
     outLines.append("    submit(config) \n")
 
-    runName = "part_{0:s}of{2:s}.sh".format(str(i),str(mjobs))
+    runName = "part_{0:s}of{1:s}.sh".format(str(i),str(mjobs))
     #runLines=['#!/usr/local/bin/python \n']
     runLines=[]
     runLines.append(textf)
